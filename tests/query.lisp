@@ -18,6 +18,10 @@
   (assert-true
       (cl-mediawiki:get-page-info "Pigment" )))
 
+(def-test-wikipedia get-image-info-test (query)
+  (assert-true
+      (cl-mediawiki:get-image-info "File:Albert Einstein Head.jpg" :iilimit 10)))
+
 (def-test-wikipedia recent-changes-test (query)
   (assert-true
       (cl-mediawiki:recent-changes)))
