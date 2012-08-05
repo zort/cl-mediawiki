@@ -11,8 +11,11 @@
    #:with-mediawiki
    ;; query
    #:login
+   #:list-category-members
    #:get-page-content
    #:get-action-tokens
+   #:get-page-info
+   #:get-image-info
    #:recent-changes
    #:user-contribs
    #:get-links
@@ -29,8 +32,6 @@
    #:add-new-page-section
    #:create-page
    #:regex-replace-all
-   #:get-page-info
-   #:get-image-info
    #:pages-that-embed
    #:upload)
   (:documentation 
