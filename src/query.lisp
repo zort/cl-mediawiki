@@ -67,6 +67,7 @@ Example:
   api.php?action=login&lgname=user&lgpassword=password ")
 
 
+;; FIXME: here we give a '((attr val) ...) type alist but elsewhere we give '((attr . val) ...)
 (define-proxy list-category-members
     :core ((action query)
 	    (list categorymembers))
@@ -79,7 +80,7 @@ Example:
     (let ((rows (find-nodes-by-name "cm" sxml)))  
       (loop for row in rows
 	    collecting (loop for (attr val) in (second row)
-			     collecting (list (symbolize-string attr) val) ))) )
+			     collecting (list (symbolize-string attr) val) ))) ) 
   :doc
     "List all pages in a given category.
 
@@ -112,6 +113,49 @@ Parameters:
     alist keys are: :title :ns :pageid
 "
     )
+
+(define-proxy all-images
+  :core ((action query)
+         (list allimages))
+  :props (aifrom aiprefix aiminsize aimaxsize ailimit aidir aisha1 aisha1base36
+                 (aiprop "timestamp|user|comment|url|size|dimensions|mime|sha1|metadata"))
+  :processor
+  (lambda (sxml)
+    (let* ((allimages (first (find-nodes-by-name
+                              "allimages"
+                              (first (find-nodes-by-name "query" sxml)))))
+           (images (mapcar (lambda (img)
+                             (convert-sxml-attribs-to-alist (second img)))
+                           (find-nodes-by-name "img" allimages)))
+           (c-blob (first (find-nodes-by-name
+                           "allimages"
+                           (first (find-nodes-by-name "query-continue" sxml)))))
+           (continuation (when c-blob
+                           (destructuring-bind (_ ((__ continuation))) c-blob
+                             (declare (ignore _ __))
+                             continuation))))
+      (values images continuation)))
+  :doc
+  "List all images, ordered by image title.
+
+Parameters:
+  aifrom        - Start listing at this title. The title need not exist. 
+                  Pass the continuation from a previous query to this parameter to
+                  start the images from where that query left off.
+  aiprefix      - Only list titles that start with this value
+  aiminsize     - Only list images that are at least this many bytes in size
+  aimaxsize     - Only list images that are at most this many bytes in size
+  ailimit       - Maximum amount of images to list (10 by default)
+  aidir         - In which direction to list, \"ascending\" (default) or \"descending\".
+  aisha1        - Only list images with this SHA-1 hash.
+  aisha1base36  - Same as aisha1, but in base 36
+  aiprop        - Which properties to get.
+                  Values (separate with '|'): timestamp, user, comment, url, size, dimensions, mime, sha1, metadata
+                  Default is all of them.
+                  The \"metadata\" property is currently unsupported.
+
+Returns a list of alists of attributes for each image, and a continuation if there is one.
+")
 
 
 #| Some experimenting indicates that, at least for queries

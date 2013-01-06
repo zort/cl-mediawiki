@@ -12,6 +12,7 @@
    ;; query
    #:login
    #:list-category-members
+   #:all-images
    #:get-page-content
    #:get-action-tokens
    #:get-page-info
